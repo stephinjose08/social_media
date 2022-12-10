@@ -19,14 +19,21 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
 
 
+class ProfileSerializer(serializers.ModelSerializer):
+    owner=serializers.ReadOnlyField(source="owner.username")
+    class Meta:
+        model=Profile
+        fields="__all__"
+
 class RegisterSerializer(serializers.ModelSerializer):
-    
+    profile_data=ProfileSerializer(read_only=True)
     class Meta:
         model = CustomUser
-        fields = ['phone', 'email', 'password','id','is_active']
+        fields = ['username','phone', 'email', 'password','id','is_active','profile_data']
         extra_kwargs={
             'password':{'write_only':True},
             'is_active':{'default':True}
+            
         }
     def create(self, validated_data):
         pwd = validated_data.pop("password")
@@ -35,13 +42,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-class ProfileSerializer(serializers.ModelSerializer):
-    owner=serializers.ReadOnlyField()
-    class Meta:
-        model=Profile
-        fields="__all__"
-    def create(self, owner,validated_data):
 
-        return Profile.objects.create(owner=owner.user,**validated_data)
+   
+    
         
    

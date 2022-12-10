@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from ..models import CustomUser,Profile
+from .permisions import isOwnerOrReadonly
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import MyTokenObtainPairSerializer, RegisterSerializer,ProfileSerializer
@@ -7,7 +8,7 @@ from rest_framework import filters, generics, serializers, status, viewsets
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.response import Response
 from rest_framework.views import APIView
-                          
+from rest_framework.permissions import IsAdminUser,IsAuthenticated                       
 
 
 
@@ -39,10 +40,17 @@ class UserCreateView(APIView):
             else:
                 return Response(status=status.HTTP_403_FORBIDDEN)
 
+class UserListView(generics.ListAPIView):
+    
+    queryset = CustomUser.objects.all()
+    serializer_class =RegisterSerializer
 
 class profile_Viewset(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated,isOwnerOrReadonly]
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer
     def list(self, request):
-     
+        
         queryset = Profile.objects.all()
         serializer = ProfileSerializer(queryset, many=True)
         return Response(serializer.data)
@@ -50,22 +58,45 @@ class profile_Viewset(viewsets.ModelViewSet):
     def retrieve(self, request, pk=None):
         
             queryset = Profile.objects.all()
-            profile = get_object_or_404(queryset, pk=pk)
-            serializer = ProfileSerializer(profile)
-            return Response(serializer.data)
-    # serializer = ProfileSerializer()
-    # def perform_create(self,request,serializer):
-    #     # here you will send `created_by` in the `validated_data` 
-        
-    #     serializer.save(data=request.data,owner=self.request.user)
-    #     return Response(status=status.HTTP_201_CREATED)
-    def create(self,request):
-        
-        serializer=ProfileSerializer(data=request.data,owner=self.request.user)
-        
+            profile = get_object_or_404(queryset,owner__pk=pk)
+            if profile is not None:
+            # profile = get_object_or_404(queryset, pk=pk)
+                serializer = ProfileSerializer(profile)
+                return Response(serializer.data)
+            else:
+                return Response(serializers.get_error_detail)
+    serializer = ProfileSerializer()
+    def perform_create(self,serializer_class):
+        serializer_class.save(owner=self.request.user)
+
+    def partial_update(self, request, pk=None):
+        queryset = Profile.objects.all()
+        profile = get_object_or_404(queryset, owner__pk=pk)
+        serializer=ProfileSerializer(profile,data=request.data,partial=True)
         if serializer.is_valid():
            serializer.save()
-           return Response(status=status.HTTP_201_CREATED)
+           return Response(status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
+
+    def update(self, request, pk=None):
+        queryset = Profile.objects.all()
+        profile = get_object_or_404(queryset, owner__pk=pk)
+      
+        serializer=ProfileSerializer(profile,data=request.data,partial=True)
+        if serializer.is_valid(raise_exception=True):
+           serializer.save()
+           return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.error_messages,status=status.HTTP_400_BAD_REQUEST)
+
+    def  destroy(self, request, pk=None):
+            queryset = Profile.objects.all()
+            book = get_object_or_404(queryset, owner__pk=pk)
+            try:
+                book.delete()
+            
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            except:
+                return Response(status=status.HTTP_400_BAD_REQUEST) 
