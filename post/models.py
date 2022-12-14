@@ -8,4 +8,4 @@ class Post(models.Model):
     created_at=models.DateField(auto_now_add=True)
 
     def __str__(self) :
-        return self.owner__username
+        return f'post by {self.owner.username}'

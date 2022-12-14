@@ -1,6 +1,6 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
-from ..models import CustomUser,Profile
+from ..models import CustomUser,Profile,followlist
 from django.contrib.auth.hashers import make_password
 
 
@@ -17,19 +17,27 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         
 
         return token
-
+   
+class followlistSerializer(serializers.ModelSerializer):
+    owner=serializers.ReadOnlyField(source="owner.username")
+    class Meta:
+        model=followlist
+        fields="__all__"
 
 class ProfileSerializer(serializers.ModelSerializer):
     owner=serializers.ReadOnlyField(source="owner.username")
+    
     class Meta:
         model=Profile
         fields="__all__"
 
 class RegisterSerializer(serializers.ModelSerializer):
     profile_data=ProfileSerializer(read_only=True)
+    
+    followers=followlistSerializer(read_only=True,many=True)
     class Meta:
         model = CustomUser
-        fields = ['username','phone', 'email', 'password','id','is_active','profile_data']
+        fields = ['username','phone', 'email', 'password','id','is_active','profile_data','followers']
         extra_kwargs={
             'password':{'write_only':True},
             'is_active':{'default':True}
@@ -43,7 +51,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         return instance
 
 
-   
+ 
     
         
    
