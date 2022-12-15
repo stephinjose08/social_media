@@ -3,7 +3,7 @@ from ..models import CustomUser,Profile
 from .permisions import isOwnerOrReadonly
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import MyTokenObtainPairSerializer, RegisterSerializer,ProfileSerializer
+from .serializers import MyTokenObtainPairSerializer, RegisterSerializer,ProfileSerializer,profile_addSerializer
 from rest_framework import filters, generics, serializers, status, viewsets
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.response import Response
@@ -93,10 +93,26 @@ class profile_Viewset(viewsets.ModelViewSet):
 
     def  destroy(self, request, pk=None):
             queryset = Profile.objects.all()
-            book = get_object_or_404(queryset, owner__pk=pk)
+            profile = get_object_or_404(queryset, owner__pk=pk)
             try:
-                book.delete()
+                profile.delete()
             
                 return Response(status=status.HTTP_204_NO_CONTENT)
             except:
                 return Response(status=status.HTTP_400_BAD_REQUEST) 
+    
+class followOrUnfollowViewset(APIView):
+    def put(self,request,pk=None):
+        print(request.user)
+        if pk is None:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        else:
+            queryset = Profile.objects.all()
+            followed_by = get_object_or_404(queryset, owner__pk=pk)
+            followed_by.followers.add(request.user)
+            followed_by.save()
+            queryset = Profile.objects.all()
+            following = get_object_or_404(queryset, owner__pk=request.user.id)
+            following.following.add(followed_by.owner)
+            following.save()
+            return Response(status=status.HTTP_200_OK)

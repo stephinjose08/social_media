@@ -58,14 +58,21 @@ class Profile(models.Model):
     lives_in=models.CharField(max_length=50,blank=True,null=True)
     date_of_join=models.DateField(auto_now_add=True,blank=False,null=False)
     profile_photo=models.ImageField(upload_to='profile',blank=True)
+    followers=models.ManyToManyField(CustomUser,related_name="followers")
+    following=models.ManyToManyField(CustomUser,related_name="following")
 
-
-class followlist(models.Model):
-    user=models.OneToOneField(CustomUser,on_delete=models.CASCADE)
-    followers=models.ManyToManyField(CustomUser,blank=True,related_name="followers")
-    following=models.ManyToManyField(CustomUser,blank=True,related_name="following")
+    
 
     def __str__(self):
-        return f'{self.user.username} followers {self.followers.count()} and following {self.following.count()}'
+        return self.owner.username
+
+
+# class followlist(models.Model):
+#     user=models.OneToOneField(CustomUser,on_delete=models.CASCADE)
+#     followers=models.ManyToManyField(CustomUser,blank=True,related_name="followers")
+#     following=models.ManyToManyField(CustomUser,blank=True,related_name="following")
+
+#     def __str__(self):
+#         return f'{self.user.username} followers {self.followers.count()} and following {self.following.count()}'
 
 

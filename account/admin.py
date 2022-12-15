@@ -1,5 +1,5 @@
 from django.contrib import admin
-from . models import CustomUser,Profile,followlist
+from . models import CustomUser,Profile
 
 class customuserAdmin(admin.ModelAdmin):
     list_display=('username','first_name','last_name','email','phone')
@@ -10,4 +10,4 @@ class user_sddress2Admin(admin.ModelAdmin):
 # Register your models here.
 admin.site.register(CustomUser,customuserAdmin)
 admin.site.register(Profile)
-admin.site.register(followlist)
+# admin.site.register(followlist)
