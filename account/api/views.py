@@ -26,7 +26,7 @@ class UserCreateView(APIView):
             if serializer.is_valid():
 
                     account=serializer.save()
-                    
+            
                     refresh = RefreshToken.for_user(account)
 
                     return Response({
@@ -46,9 +46,10 @@ class UserListView(generics.ListAPIView):
     serializer_class =RegisterSerializer
 
 class profile_Viewset(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated,isOwnerOrReadonly]
+    
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated,isOwnerOrReadonly]
     def list(self, request):
         
         queryset = Profile.objects.all()
@@ -109,10 +110,22 @@ class followOrUnfollowViewset(APIView):
         else:
             queryset = Profile.objects.all()
             followed_by = get_object_or_404(queryset, owner__pk=pk)
-            followed_by.followers.add(request.user)
-            followed_by.save()
-            queryset = Profile.objects.all()
-            following = get_object_or_404(queryset, owner__pk=request.user.id)
-            following.following.add(followed_by.owner)
-            following.save()
+        
+            if not request.user in followed_by.followers:
+
+                followed_by.followers.add(request.user)
+                followed_by.save()
+                queryset = Profile.objects.all()
+                following = get_object_or_404(queryset, owner__pk=request.user.id)
+
+                following.following.add(followed_by.owner)
+                following.save()
+            else:
+                followed_by.followers.remove(request.user)
+                followed_by.save()
+                queryset = Profile.objects.all()
+                following = get_object_or_404(queryset, owner__pk=request.user.id)
+
+                following.following.remove(followed_by.owner)
+                following.save()
             return Response(status=status.HTTP_200_OK)

@@ -2,14 +2,14 @@ from django.shortcuts import get_object_or_404
 from rest_framework import filters, generics, serializers, status, viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
-from account.api.permisions import isOwnerOrReadonly
+from account.api.permisions import isOwnerOrReadonly,commentPermision
 from ..models import Comment
 from .serializers import CommentSerializer
 
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly,isOwnerOrReadonly]
+    permission_classes = [IsAuthenticatedOrReadOnly,commentPermision]
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
 
@@ -37,6 +37,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     def partial_update(self, request, pk=None):
         queryset = Comment.objects.all()
         comment = get_object_or_404(queryset, pk=pk)
+        self.check_object_permissions(request, comment)
         serializer=CommentSerializer(comment,data=request.data,partial=True)
         if serializer.is_valid():
            serializer.save()
@@ -48,7 +49,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     def update(self, request, pk=None):
         queryset = Comment.objects.all()
         comment = get_object_or_404(queryset, pk=pk)
-      
+        self.check_object_permissions(request, comment)
         serializer=CommentSerializer(comment,data=request.data,partial=True)
         if serializer.is_valid(raise_exception=True):
            serializer.save()
@@ -59,6 +60,8 @@ class CommentViewSet(viewsets.ModelViewSet):
     def  destroy(self, request, pk=None):
             queryset = Comment.objects.all()
             comment = get_object_or_404(queryset, pk=pk)
+            self.check_object_permissions(request, comment)
+
             try:
                 comment.delete()
             

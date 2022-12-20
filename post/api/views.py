@@ -9,10 +9,10 @@ from .serializers import PostSerializer
 
 
 class PostViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly,isOwnerOrReadonly]
+    
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-
+    permission_classes = [IsAuthenticatedOrReadOnly,isOwnerOrReadonly]
     def list(self, request):
         
         queryset = Post.objects.all()
@@ -37,6 +37,7 @@ class PostViewSet(viewsets.ModelViewSet):
     def partial_update(self, request, pk=None):
         queryset = Post.objects.all()
         post = get_object_or_404(queryset, pk=pk)
+        self.check_object_permissions(request, post)
         serializer=PostSerializer(post,data=request.data,partial=True)
         if serializer.is_valid():
            serializer.save()
@@ -48,17 +49,19 @@ class PostViewSet(viewsets.ModelViewSet):
     def update(self, request, pk=None):
         queryset = Post.objects.all()
         post = get_object_or_404(queryset, pk=pk)
-      
+        self.check_object_permissions(request, post)
         serializer=PostSerializer(post,data=request.data,partial=True)
         if serializer.is_valid(raise_exception=True):
            serializer.save()
            return Response(status=status.HTTP_200_OK)
         else:
             return Response(serializer.error_messages,status=status.HTTP_400_BAD_REQUEST)
-
+    
     def  destroy(self, request, pk=None):
+            print(request.user)
             queryset = Post.objects.all()
             post = get_object_or_404(queryset, pk=pk)
+            self.check_object_permissions(request, post)
             try:
                 post.delete()
             
