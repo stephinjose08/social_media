@@ -1,6 +1,6 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
-from ..models import CustomUser,Profile
+from ..models import CustomUser,Profile,blockusers
 from django.contrib.auth.hashers import make_password
 
 
@@ -23,6 +23,11 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 #     class Meta:
 #         model=followlist
 #         fields="__all__"
+class blockeduserSerializers(serializers.ModelSerializer):
+    class Meta:
+        model=blockusers
+        fields='__all__'
+
 
 class profile_addSerializer(serializers.ModelSerializer):
     owner=serializers.ReadOnlyField(source="owner.username")
@@ -36,6 +41,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     owner=serializers.ReadOnlyField(source="owner.username")
     following=serializers.PrimaryKeyRelatedField(read_only=True,many=True)
     followers=serializers.PrimaryKeyRelatedField(read_only=True,many=True)
+    
     class Meta:
         model=Profile
         #exclude=('following','followers')
@@ -43,11 +49,11 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 class RegisterSerializer(serializers.ModelSerializer):
     profile_data=ProfileSerializer(read_only=True)
-    
+    bloked_users=serializers.PrimaryKeyRelatedField(read_only=True,many=True)
     # followers=followlistSerializer(read_only=True,many=True)
     class Meta:
         model = CustomUser
-        fields = ['username','phone', 'email', 'password','id','is_active','profile_data']
+        fields = ['username','phone', 'email', 'password','id','is_active','profile_data','bloked_users']
         extra_kwargs={
             'password':{'write_only':True},
             'is_active':{'default':True}

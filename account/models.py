@@ -76,3 +76,9 @@ class Profile(models.Model):
 #         return f'{self.user.username} followers {self.followers.count()} and following {self.following.count()}'
 
 
+class blockusers(models.Model):
+    user=models.OneToOneField(CustomUser,on_delete=models.CASCADE,related_name="blocked_users")
+    blockedusers=models.ManyToManyField(CustomUser,related_name="bloked_by")
+
+    def __str__(self):
+        return self.user.username

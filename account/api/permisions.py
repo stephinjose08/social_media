@@ -26,3 +26,5 @@ class commentPermision(permissions.BasePermission):
             return True
         else:
             return obj.owner==request.user or obj.post.owner==request.user or request.user.is_superuser
+
+

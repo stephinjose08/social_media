@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from ..models import CustomUser,Profile
+from ..models import CustomUser,Profile,blockusers
 from .permisions import isOwnerOrReadonly
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -60,8 +60,19 @@ class profile_Viewset(viewsets.ModelViewSet):
         
             queryset = Profile.objects.all()
             profile = get_object_or_404(queryset,owner__pk=pk)
+            blocklist=blockusers.objects.all()
+            list=get_object_or_404(blocklist,user__pk=request.user.id)
+            inst=CustomUser.objects.get(id=request.user.id)
+            bl=inst.blocked_users.blockedusers.all()
+            print("hiiii")
+            print(inst.blocked_users.blockedusers.all())
+            chekuser=CustomUser.objects.get(id=pk)
+            # for user in list.blockedusers.values_list():
+            #     print(user)
             if profile is not None:
-            # profile = get_object_or_404(queryset, pk=pk)
+                if  chekuser  in bl:
+                    return Response({"msg":"you are bloked by user"})
+                #profile = get_object_or_404(queryset, pk=pk)
                 serializer = ProfileSerializer(profile)
                 return Response(serializer.data)
             else:

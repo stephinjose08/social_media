@@ -21,5 +21,6 @@ urlpatterns = [
     path('api/user/',include('account.api.urls')),
     path('api/post/',include('post.api.urls')),
     path('api/comments/',include('comments.api.urls')),
+    path('api/likes/',include('likes.api.urls')),
     path('api-auth/',include('rest_framework.urls')),
 ]

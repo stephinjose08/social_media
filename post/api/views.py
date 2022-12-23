@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from account.api.permisions import isOwnerOrReadonly
 from ..models import Post
 from .serializers import PostSerializer
-
-
+from django.db.models import Count
+from likes.models import likes
 
 class PostViewSet(viewsets.ModelViewSet):
     
@@ -15,7 +15,9 @@ class PostViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly,isOwnerOrReadonly]
     def list(self, request):
         
-        queryset = Post.objects.all()
+        # queryset = Post.objects.all()
+        # serializer = PostSerializer(queryset, many=True)
+        queryset = Post.objects.annotate(number_of_likes=Count('likes'))
         serializer = PostSerializer(queryset, many=True)
         return Response(serializer.data)
     

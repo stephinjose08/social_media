@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'account',
     'post',
     'comments',
+    'likes',
     'rest_framework',
 
     'rest_framework_simplejwt',
@@ -61,7 +62,7 @@ MIDDLEWARE = [
     
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'account.custommiddleware.simplemiddle',
+    #'account.custommiddleware.simplemiddle',
     # 'account.custommiddleware.CustomMiddleware',
 ]
 

@@ -12,11 +12,11 @@ from django.http import HttpResponse
 from django.utils.deprecation import MiddlewareMixin
 from django.contrib.auth.middleware import get_user
 key='django-insecure-9ebbq6g!m&-@lol5^^w4_3=1s4rnve!jcb6_mlc-yz^@)8u#x-'
-class simplemiddle:
+class simplemiddle(MiddlewareMixin):
     def __init__(self,getrequest):
         self.response=getrequest
 
-    
+     
     def __call__(self,request):
         
         print("before request")
