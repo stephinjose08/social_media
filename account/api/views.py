@@ -8,7 +8,8 @@ from rest_framework import filters, generics, serializers, status, viewsets
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAdminUser,IsAuthenticated                       
+from rest_framework.permissions import IsAdminUser,IsAuthenticated       
+from django.core.exceptions import ObjectDoesNotExist                
 
 
 
@@ -57,26 +58,30 @@ class profile_Viewset(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
-        
+        try:
             queryset = Profile.objects.all()
+            print("up")
             profile = get_object_or_404(queryset,owner__pk=pk)
-            blocklist=blockusers.objects.all()
-            list=get_object_or_404(blocklist,user__pk=request.user.id)
-            inst=CustomUser.objects.get(id=request.user.id)
-            bl=inst.blocked_users.blockedusers.all()
-            print("hiiii")
-            print(inst.blocked_users.blockedusers.all())
-            chekuser=CustomUser.objects.get(id=pk)
-            # for user in list.blockedusers.values_list():
-            #     print(user)
+            print("llll")
+            # if blockusers.objects.all().exists():
+            #     blocklist=blockusers.objects.all()
+            requestedUser=CustomUser.objects.get(id=pk)
+            print("hi")
+            if blockusers.objects.filter(user__pk=pk).exists():
+                if  requestedUser.blocked_users.blockedusers.all().exists():
+                    blockedList=requestedUser.blocked_users.blockedusers.all()
+                    currentUser=CustomUser.objects.get(id=request.user.id)
+                    if  currentUser  in blockedList:
+                        return Response({"msg":"you are bloked by user"})
+       
             if profile is not None:
-                if  chekuser  in bl:
-                    return Response({"msg":"you are bloked by user"})
+                
                 #profile = get_object_or_404(queryset, pk=pk)
                 serializer = ProfileSerializer(profile)
                 return Response(serializer.data)
-            else:
-                return Response(serializers.get_error_detail)
+        except ObjectDoesNotExist:
+                return Response({"msg":"details not found"},status=status.HTTP_404_NOT_FOUND)
+        
     serializer = ProfileSerializer()
     def perform_create(self,serializer_class):
         serializer_class.save(owner=self.request.user)
@@ -140,3 +145,31 @@ class followOrUnfollowViewset(APIView):
                 following.following.remove(followed_by.owner)
                 following.save()
             return Response(status=status.HTTP_200_OK)
+
+
+
+class block_user(APIView):
+    def put(self,request,pk=None):
+
+
+    
+       if blockusers.objects.filter(user__pk=request.user.id).exists():
+            queryset=blockusers.objects.all()
+            current_user=get_object_or_404(queryset,user__pk=request.user.id)
+            bloking_user=CustomUser.objects.get(pk=pk)
+            
+            if current_user.blockedusers.all().exists():
+                bl=current_user.blockedusers.all()
+                if bloking_user is not None:
+                        if bloking_user in bl:
+                            print("success")
+                            current_user.blockedusers.remove(bloking_user.id)
+                        else:
+                                current_user.blockedusers.add(bloking_user.id)
+                current_user.save()
+       return Response(status=status.HTTP_200_OK)
+                    
+
+
+ 
+

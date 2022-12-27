@@ -36,7 +36,7 @@ class CustomUserManager(BaseUserManager):
         return self._create_user(phone,email, password, **extra_fields)
 
 class CustomUser(AbstractUser):
-    username=models.CharField(max_length=15,blank=True)
+    username=models.CharField(max_length=10)
     phone=models.CharField(max_length=12,unique=True)
 
     USERNAME_FIELD = 'phone'
@@ -78,7 +78,7 @@ class Profile(models.Model):
 
 class blockusers(models.Model):
     user=models.OneToOneField(CustomUser,on_delete=models.CASCADE,related_name="blocked_users")
-    blockedusers=models.ManyToManyField(CustomUser,related_name="bloked_by")
+    blockedusers=models.ManyToManyField(CustomUser,related_name="bloked_by",blank=True)
 
     def __str__(self):
         return self.user.username

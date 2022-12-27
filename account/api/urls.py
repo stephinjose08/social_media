@@ -6,7 +6,7 @@ from rest_framework.routers import DefaultRouter
 from .views import UserCreateView,MyTokenObtainPairView,UserListView
 from django.contrib import admin
 from django.urls import include, path
-from .views import profile_Viewset,followOrUnfollowViewset
+from .views import profile_Viewset,followOrUnfollowViewset,block_user
 router = DefaultRouter()
 router.register('profile', profile_Viewset, basename='profile')
 urlpatterns = [
@@ -18,5 +18,6 @@ urlpatterns = [
     path('list/', UserListView.as_view(),name='user-list'),
 
     path('is_follow/<int:pk>/', followOrUnfollowViewset.as_view(),name='user-list'),
+    path('block/<int:pk>/', block_user.as_view(),name='block-user'),
 
 ]
