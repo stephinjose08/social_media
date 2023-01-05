@@ -67,13 +67,16 @@ class Profile(models.Model):
         return self.owner.username
 
 
-# class followlist(models.Model):
-#     user=models.OneToOneField(CustomUser,on_delete=models.CASCADE)
-#     followers=models.ManyToManyField(CustomUser,blank=True,related_name="followers")
-#     following=models.ManyToManyField(CustomUser,blank=True,related_name="following")
+class followlist(models.Model):
+    user=models.OneToOneField(CustomUser,on_delete=models.CASCADE)
+    followers=models.ManyToManyField(CustomUser,blank=True,related_name="followers_list")
+    following=models.ManyToManyField(CustomUser,blank=True,related_name="following_list")
+    pending_req=models.ManyToManyField(CustomUser,blank=True,related_name="pending_req")
+    is_accept=models.BooleanField(default=False)
+    is_rejected=models.BooleanField(default=True)
 
-#     def __str__(self):
-#         return f'{self.user.username} followers {self.followers.count()} and following {self.following.count()}'
+    def __str__(self):
+        return f'{self.user.username} followers {self.followers.count()} and following {self.following.count()}'
 
 
 class blockusers(models.Model):
@@ -82,3 +85,4 @@ class blockusers(models.Model):
 
     def __str__(self):
         return self.user.username
+    

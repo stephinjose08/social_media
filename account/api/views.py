@@ -17,11 +17,19 @@ class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 
+
+class logout_view(APIView):
+
+   def post(self,request):
+        request.user.auth_token.delete()
+        return Response(status=status.HTTP_200_OK)
+
 class UserCreateView(APIView):
     def post(self,request):
         username=request.data['username']
         if CustomUser.objects.filter(username=username).exists():
-            return Response({"detail":"Username already exist try another"},status=status.HTTP_403_FORBIDDEN)
+            return Response({"detail":"Username already exist try another"},
+            status=status.HTTP_403_FORBIDDEN)
         else:
             serializer=RegisterSerializer(data=request.data)
             if serializer.is_valid():
@@ -80,7 +88,8 @@ class profile_Viewset(viewsets.ModelViewSet):
                 serializer = ProfileSerializer(profile)
                 return Response(serializer.data)
         except ObjectDoesNotExist:
-                return Response({"msg":"details not found"},status=status.HTTP_404_NOT_FOUND)
+                return Response({"msg":"details not found"},
+                status=status.HTTP_404_NOT_FOUND)
         
     serializer = ProfileSerializer()
     def perform_create(self,serializer_class):
@@ -106,7 +115,8 @@ class profile_Viewset(viewsets.ModelViewSet):
            serializer.save()
            return Response(status=status.HTTP_200_OK)
         else:
-            return Response(serializer.error_messages,status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.error_messages,
+            status=status.HTTP_400_BAD_REQUEST)
 
     def  destroy(self, request, pk=None):
             queryset = Profile.objects.all()
