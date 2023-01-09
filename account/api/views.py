@@ -109,8 +109,9 @@ class profile_Viewset(viewsets.ModelViewSet):
     def update(self, request, pk=None):
         queryset = Profile.objects.all()
         profile = get_object_or_404(queryset, owner__pk=pk)
-      
+
         serializer=ProfileSerializer(profile,data=request.data,partial=True)
+        print("hhh")
         if serializer.is_valid(raise_exception=True):
            serializer.save()
            return Response(status=status.HTTP_200_OK)
